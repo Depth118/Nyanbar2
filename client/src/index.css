@@ -590,3 +590,10 @@ body {
 .animate-toggle-scale {
   animation: toggle-scale 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+html,
+body,
+#root {
+  min-height: 100vh;
+  background-color: #18181b;
+}
