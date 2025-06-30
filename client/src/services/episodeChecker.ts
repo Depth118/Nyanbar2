@@ -71,9 +71,11 @@ class EpisodeChecker {
         searchTerm = `${searchTerm} ${anime.season}`;
       }
 
+      const apiBase = process.env.REACT_APP_API_URL || "";
+
       // Get all torrents for this anime
       const response = await axios.get(
-        `/api/torrents/${encodeURIComponent(searchTerm)}?episode=all`
+        `${apiBase}/api/torrents/${encodeURIComponent(searchTerm)}?episode=all`
       );
       const torrents = response.data;
 

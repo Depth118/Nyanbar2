@@ -28,6 +28,8 @@ const Search: React.FC = () => {
   const [searched, setSearched] = useState(false);
   const [customList, setCustomList] = useState<Anime[]>([]);
 
+  const apiBase = process.env.REACT_APP_API_URL || "";
+
   // Load custom list from localStorage
   useEffect(() => {
     try {
@@ -75,7 +77,7 @@ const Search: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `/api/search?query=${encodeURIComponent(query)}`
+        `${apiBase}/api/search?query=${encodeURIComponent(query)}`
       );
       setResults(response.data);
       setSearched(true);

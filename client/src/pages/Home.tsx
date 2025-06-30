@@ -36,6 +36,8 @@ const animeFacts = [
 const apiCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+const apiBase = process.env.REACT_APP_API_URL || "";
+
 const Home: React.FC = () => {
   const [trending, setTrending] = useState<Anime[]>([]);
   const [popular, setPopular] = useState<Anime[]>([]);
@@ -57,7 +59,7 @@ const Home: React.FC = () => {
       return cached.data;
     }
 
-    const response = await axios.get(url);
+    const response = await axios.get(apiBase + url);
     apiCache.set(url, { data: response.data, timestamp: now });
     return response.data;
   };

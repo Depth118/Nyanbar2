@@ -78,6 +78,8 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
   const [animeLoading, setAnimeLoading] = useState(true);
   const [torrentsLoading, setTorrentsLoading] = useState(true);
 
+  const apiBase = process.env.REACT_APP_API_URL || "";
+
   // Function to clean title by removing year and extra spaces
   const cleanTitle = (title: string): string => {
     // Remove year patterns (4 digits at the end or beginning)
@@ -104,7 +106,9 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
         return;
       }
       const response = await axios.get(
-        `/api/torrents/${encodeURIComponent(title)}?episode=${episode}`
+        `${apiBase}/api/torrents/${encodeURIComponent(
+          title
+        )}?episode=${episode}`
       );
       const torrentsData = response.data;
       setTorrents(torrentsData);
@@ -122,7 +126,7 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
       setTorrentsLoading(true);
       setError("");
       try {
-        const response = await axios.get(`/api/anime/${id}`);
+        const response = await axios.get(`${apiBase}/api/anime/${id}`);
         const animeData = response.data;
         setAnime(animeData);
         setAnimeLoading(false);
@@ -154,7 +158,9 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
         try {
           // Fetch all torrents with cleaned title
           const torrentsResponse = await axios.get(
-            `/api/torrents/${encodeURIComponent(searchTerm)}?episode=all`
+            `${apiBase}/api/torrents/${encodeURIComponent(
+              searchTerm
+            )}?episode=all`
           );
           const allTorrentsData = torrentsResponse.data;
           // Find the latest episode that has torrents available
