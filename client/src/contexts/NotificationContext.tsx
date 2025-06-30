@@ -99,15 +99,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         );
         return updatedNotifications;
       });
-
-      // Show browser notification if supported
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(`New Episode Available!`, {
-          body: `${animeTitle} Episode ${episode} is now available for download`,
-          icon: "/favicon.ico",
-          tag: newNotification.id,
-        });
-      }
     },
     []
   );
@@ -200,13 +191,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const stopEpisodeChecking = useCallback(() => {
     if (episodeCheckerRef.current) {
       episodeCheckerRef.current.stopPeriodicChecking();
-    }
-  }, []);
-
-  // Request notification permission on mount
-  useEffect(() => {
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
     }
   }, []);
 
