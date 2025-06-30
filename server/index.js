@@ -29,6 +29,20 @@ const setCachedData = (key, data) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
+// Add at the top of the file:
+const torrentCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+function getTorrentCache(key) {
+  const entry = torrentCache.get(key);
+  if (entry && Date.now() - entry.timestamp < CACHE_TTL) {
+    return entry.data;
+  }
+  return null;
+}
+function setTorrentCache(key, data) {
+  torrentCache.set(key, { data, timestamp: Date.now() });
+}
+
 // AniList GraphQL endpoint
 const ANILIST_API = "https://graphql.anilist.co";
 
@@ -301,6 +315,19 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
 
     let allTorrents = [];
 
+    // At the start of /api/torrents/:animeTitle route, after decoding title and episode:
+    const cacheKey = `${decodedTitle}|${episode}`;
+    const cached = getTorrentCache(cacheKey);
+    if (cached) {
+      console.log(
+        "Serving torrents from cache for",
+        decodedTitle,
+        "episode",
+        episode
+      );
+      return res.json(cached);
+    }
+
     if (episode && episode !== "all") {
       // Format episode number with leading zero for better search results
       const episodeNum = parseInt(episode);
@@ -496,6 +523,8 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
     allTorrents = allTorrents.slice(0, 40);
 
     console.log("Returning", allTorrents.length, "torrents for", decodedTitle);
+    // Before res.json(allTorrents):
+    setTorrentCache(cacheKey, allTorrents);
     res.json(allTorrents);
   } catch (error) {
     console.error("Error fetching torrents:", error);

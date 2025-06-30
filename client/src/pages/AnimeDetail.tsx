@@ -859,8 +859,11 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
             </h3>
             <div className="flex-1">
               {torrentsLoading ? (
-                <div className="flex justify-center items-center h-32">
-                  <span className="loading loading-spinner loading-md" />
+                <div className="flex flex-col justify-center items-center h-32">
+                  <span className="loading loading-spinner loading-lg mb-2" />
+                  <span className="text-gray-400">
+                    Loading available downloads...
+                  </span>
                 </div>
               ) : (
                 <TorrentSection
