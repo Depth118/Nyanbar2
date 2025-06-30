@@ -71,8 +71,8 @@ const Home: React.FC = () => {
           fetchWithCache("/api/popular"),
         ]);
 
-        setTrending(trendingData);
-        setPopular(popularData);
+        setTrending(Array.isArray(trendingData) ? trendingData : []);
+        setPopular(Array.isArray(popularData) ? popularData : []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -200,19 +200,20 @@ const Home: React.FC = () => {
           </h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-          {trending.map((anime, index) => (
-            <div
-              key={anime.id}
-              className="animate-fade-in h-full"
-              style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
-            >
-              <AnimeCard
-                anime={anime}
-                onAddToCustomList={addToCustomList}
-                isInCustomList={isInCustomList(anime.id)}
-              />
-            </div>
-          ))}
+          {Array.isArray(trending) &&
+            trending.map((anime, index) => (
+              <div
+                key={anime.id}
+                className="animate-fade-in h-full"
+                style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
+              >
+                <AnimeCard
+                  anime={anime}
+                  onAddToCustomList={addToCustomList}
+                  isInCustomList={isInCustomList(anime.id)}
+                />
+              </div>
+            ))}
         </div>
       </section>
 
@@ -225,19 +226,20 @@ const Home: React.FC = () => {
           </h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-          {popular.map((anime, index) => (
-            <div
-              key={anime.id}
-              className="animate-fade-in h-full"
-              style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
-            >
-              <AnimeCard
-                anime={anime}
-                onAddToCustomList={addToCustomList}
-                isInCustomList={isInCustomList(anime.id)}
-              />
-            </div>
-          ))}
+          {Array.isArray(popular) &&
+            popular.map((anime, index) => (
+              <div
+                key={anime.id}
+                className="animate-fade-in h-full"
+                style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
+              >
+                <AnimeCard
+                  anime={anime}
+                  onAddToCustomList={addToCustomList}
+                  isInCustomList={isInCustomList(anime.id)}
+                />
+              </div>
+            ))}
         </div>
       </section>
     </div>
