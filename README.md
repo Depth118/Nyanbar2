@@ -165,11 +165,3 @@ nyanbar/
 ## License
 
 This project is licensed under the MIT License.
-
-## Disclaimer
-
-This application is for educational purposes only. Please respect copyright laws and only download content that you have the right to access. The developers are not responsible for any misuse of this application.
-
-## Support
-
-If you encounter any issues or have questions, please open an issue on the GitHub repository.
