@@ -1,4 +1,4 @@
-# NyanBar - Modern Anime Streaming Website
+# Nyanbar Anime Streaming Website
 
 A modern anime streaming website that integrates with AniList for anime metadata and nyaa.si for download links. Built with React, TypeScript, Node.js, and Tailwind CSS.
 

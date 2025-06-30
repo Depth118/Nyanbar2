@@ -71,8 +71,6 @@ class EpisodeChecker {
         searchTerm = `${searchTerm} ${anime.season}`;
       }
 
-      console.log(`Checking for new episodes: ${searchTerm}`);
-
       // Get all torrents for this anime
       const response = await axios.get(
         `/api/torrents/${encodeURIComponent(searchTerm)}?episode=all`
@@ -80,7 +78,6 @@ class EpisodeChecker {
       const torrents = response.data;
 
       if (torrents.length === 0) {
-        console.log(`No torrents found for ${title}`);
         return null;
       }
 
@@ -95,17 +92,12 @@ class EpisodeChecker {
         .filter((ep: number) => ep > 0);
 
       if (episodeNumbers.length === 0) {
-        console.log(`No episode numbers found in torrents for ${title}`);
         return null;
       }
 
       const latestEpisode = Math.max(...episodeNumbers);
       const storedData = this.getStoredEpisodeData(anime.id);
       const currentEpisode = storedData?.lastCheckedEpisode || 0;
-
-      console.log(
-        `${title}: Current episode ${currentEpisode}, Latest episode ${latestEpisode}`
-      );
 
       return {
         animeId: anime.id,

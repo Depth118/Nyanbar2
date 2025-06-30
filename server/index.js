@@ -170,9 +170,6 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
 
     // Decode the title
     const decodedTitle = decodeURIComponent(animeTitle);
-    console.log(
-      `Searching for torrents with title: "${decodedTitle}" and episode: ${episode}`
-    );
 
     // Preferred encoder groups in order of priority
     const preferredEncoders = [
@@ -188,15 +185,9 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
       const titleUpper = title.toUpperCase();
       for (let i = 0; i < preferredEncoders.length; i++) {
         if (titleUpper.includes(preferredEncoders[i].toUpperCase())) {
-          console.log(
-            `DEBUG: Encoder priority for "${title}": ${preferredEncoders[i]} (priority ${i})`
-          );
           return i; // Return priority index (0 = highest priority)
         }
       }
-      console.log(
-        `DEBUG: Encoder priority for "${title}": unknown (priority ${preferredEncoders.length})`
-      );
       return preferredEncoders.length; // Lower priority for non-preferred encoders
     };
 
@@ -214,7 +205,6 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
 
     // Function to check if torrent title is relevant to our search
     const isRelevantTorrent = (torrentTitle, searchTitle) => {
-      console.log(`DEBUG: isRelevantTorrent called for: "${torrentTitle}"`);
       const torrentUpper = torrentTitle.toUpperCase();
       const searchUpper = searchTitle.toUpperCase();
 
@@ -231,9 +221,6 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
         );
 
         if (!animeTitleMatches) {
-          console.log(
-            `DEBUG: isRelevantTorrent returning: false for "${torrentTitle}"`
-          );
           return false;
         }
 
@@ -268,20 +255,8 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
           const start = parseInt(rangeMatch[1]);
           const end = parseInt(rangeMatch[2]);
           if (isBatch && episodeNum >= start && episodeNum <= end) {
-            console.log(
-              `DEBUG: Batch/range detected and includes episode ${episodeNum} - ACCEPTED`
-            );
-            console.log(
-              `DEBUG: isRelevantTorrent returning: true for "${torrentTitle}"`
-            );
             return true;
           } else {
-            console.log(
-              `DEBUG: Batch/range detected but does not include episode ${episodeNum} - REJECTED`
-            );
-            console.log(
-              `DEBUG: isRelevantTorrent returning: false for "${torrentTitle}"`
-            );
             return false;
           }
         }
@@ -295,61 +270,27 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
         }
         // Accept only if the only episode number is the target
         if (episodeNumbers.length === 1 && episodeNumbers[0] === episodeNum) {
-          console.log(
-            `DEBUG: Only episode number is the target (${episodeNum}) - ACCEPTED`
-          );
-          console.log(
-            `DEBUG: isRelevantTorrent returning: true for "${torrentTitle}"`
-          );
           return true;
         }
         // If no episode numbers, reject
         if (episodeNumbers.length === 0) {
-          console.log(`DEBUG: No episode numbers found - REJECTED`);
-          console.log(
-            `DEBUG: isRelevantTorrent returning: false for "${torrentTitle}"`
-          );
           return false;
         }
         // If multiple episode numbers, reject
         if (episodeNumbers.length > 1) {
-          console.log(
-            `DEBUG: Multiple episode numbers found (${episodeNumbers.join(
-              ", "
-            )}) - REJECTED`
-          );
-          console.log(
-            `DEBUG: isRelevantTorrent returning: false for "${torrentTitle}"`
-          );
           return false;
         }
         // Fallback: reject
-        console.log(
-          `DEBUG: No strict match for episode ${episodeNum} - REJECTED`
-        );
-        console.log(
-          `DEBUG: isRelevantTorrent returning: false for "${torrentTitle}"`
-        );
         return false;
       } else {
         // All episodes search - be very lenient
         if (searchTerms.length <= 1) {
           // If we have 1 or fewer terms, require it to match
-          console.log(
-            `DEBUG: isRelevantTorrent returning: ${searchTerms.every((term) =>
-              torrentUpper.includes(term)
-            )} for "${torrentTitle}"`
-          );
           return searchTerms.every((term) => torrentUpper.includes(term));
         } else {
           // If we have more than 1 term, require at least 1 to match
           const matchingTerms = searchTerms.filter((term) =>
             torrentUpper.includes(term)
-          );
-          console.log(
-            `DEBUG: isRelevantTorrent returning: ${
-              matchingTerms.length >= 1
-            } for "${torrentTitle}"`
           );
           return matchingTerms.length >= 1;
         }
@@ -392,8 +333,6 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
           const encodedTitle = encodeURIComponent(searchQuery);
           const nyaaUrl = `https://nyaa.si/?f=0&c=1_0&q=${encodedTitle}`;
 
-          console.log(`Trying search: "${searchQuery}"`);
-
           const response = await axios.get(nyaaUrl, {
             headers: {
               "User-Agent":
@@ -420,9 +359,7 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
                 .attr("href");
 
               if (title && downloadUrl) {
-                console.log(`DEBUG: Checking torrent: "${title}"`);
                 const isRelevant = isRelevantTorrent(title, cleanAnimeTitle);
-                console.log(`DEBUG: Is relevant: ${isRelevant}`);
 
                 if (isRelevant) {
                   const isDuplicate = allTorrents.some(
@@ -443,36 +380,16 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
                         : null,
                     });
                     foundRelevant = true;
-                    console.log(`DEBUG: Added torrent: "${title}"`);
-                  } else {
-                    console.log(`DEBUG: Duplicate torrent skipped: "${title}"`);
                   }
-                } else {
-                  console.log(`DEBUG: Rejected torrent: "${title}"`);
                 }
               }
             }
           });
 
-          // If we found a relevant torrent, stop searching further
-          if (foundRelevant && allTorrents.length > 0) {
-            console.log(
-              `Found ${allTorrents.length} relevant torrents, stopping search early`
-            );
-            break;
-          }
-
           // Shorter delay between requests to avoid rate limiting
           await new Promise((resolve) => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(
-            `Error with search variation "${searchQuery}":`,
-            error.message
-          );
           if (error.response && error.response.status === 429) {
-            console.log(
-              "Rate limited, waiting 5 seconds before next request..."
-            );
             await new Promise((resolve) => setTimeout(resolve, 5000));
           } else {
             await new Promise((resolve) => setTimeout(resolve, 500));
@@ -494,8 +411,6 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
 
         const encodedTitle = encodeURIComponent(searchQuery);
         const nyaaUrl = `https://nyaa.si/?f=0&c=1_0&q=${encodedTitle}`;
-
-        console.log(`Searching for all episodes with: "${searchQuery}"`);
 
         try {
           const response = await axios.get(nyaaUrl, {
@@ -553,21 +468,12 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         } catch (error) {
-          console.error(
-            `Error with search variation "${searchQuery}":`,
-            error.message
-          );
           if (error.response && error.response.status === 429) {
-            console.log("Rate limited on all episodes search");
             break; // Stop trying more variations if rate limited
           }
         }
       }
     }
-
-    console.log(
-      `Found ${allTorrents.length} relevant torrents for "${decodedTitle}"`
-    );
 
     // Sort by encoder priority first, then by seeds within each priority group
     allTorrents.sort((a, b) => {
@@ -583,7 +489,7 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
       return b.seeds - a.seeds;
     });
 
-    allTorrents = allTorrents.slice(0, 20);
+    allTorrents = allTorrents.slice(0, 40);
 
     res.json(allTorrents);
   } catch (error) {

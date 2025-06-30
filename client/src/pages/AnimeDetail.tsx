@@ -75,6 +75,8 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
   const [isInCustomList, setIsInCustomList] = useState(false);
   const [torrentSort, setTorrentSort] = useState("default");
   const [qualityFilter, setQualityFilter] = useState("all");
+  const [animeLoading, setAnimeLoading] = useState(true);
+  const [torrentsLoading, setTorrentsLoading] = useState(true);
 
   // Function to clean title by removing year and extra spaces
   const cleanTitle = (title: string): string => {
@@ -93,44 +95,40 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
     episode: string,
     animeTitle?: string
   ) => {
-    setLoading(true);
+    setTorrentsLoading(true);
     try {
-      console.log("Fetching torrents for episode:", episode);
       const title = animeTitle;
       if (!title) {
-        console.error("No anime title available");
         setTorrents([]);
+        setTorrentsLoading(false);
         return;
       }
-      console.log("Using search term:", title);
-      // Always fetch fresh data - no caching
       const response = await axios.get(
         `/api/torrents/${encodeURIComponent(title)}?episode=${episode}`
       );
       const torrentsData = response.data;
-      console.log("Received torrents from API:", torrentsData.length);
       setTorrents(torrentsData);
     } catch (error) {
-      console.error("Error fetching torrents:", error);
       setTorrents([]);
     } finally {
-      setLoading(false);
+      setTorrentsLoading(false);
     }
   };
 
   useEffect(() => {
     const fetchAnime = async () => {
       if (!id) return;
-      setLoading(true);
+      setAnimeLoading(true);
+      setTorrentsLoading(true);
       setError("");
       try {
         const response = await axios.get(`/api/anime/${id}`);
         const animeData = response.data;
         setAnime(animeData);
+        setAnimeLoading(false);
         // Check if there's an episode parameter in the URL (from notification)
         const episodeParam = searchParams.get("episode");
         if (episodeParam) {
-          console.log("Episode parameter found in URL:", episodeParam);
           setSelectedEpisode(episodeParam);
           setTimeout(() => {
             const torrentsSection = document.querySelector(
@@ -149,10 +147,8 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
           animeData.title.english ||
           animeData.title.romaji ||
           animeData.title.native;
-        console.log("Fetching all torrents for anime title:", title);
         // Clean the title by removing year
         const cleanAnimeTitle = cleanTitle(title);
-        console.log("Using cleaned title for search:", cleanAnimeTitle);
         // Use cleaned title for search - no variations
         const searchTerm = cleanAnimeTitle;
         try {
@@ -161,9 +157,6 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
             `/api/torrents/${encodeURIComponent(searchTerm)}?episode=all`
           );
           const allTorrentsData = torrentsResponse.data;
-          console.log(
-            `Found ${allTorrentsData.length} torrents for "${searchTerm}"`
-          );
           // Find the latest episode that has torrents available
           let latestEpisode = 0;
           if (allTorrentsData.length > 0) {
@@ -198,9 +191,6 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
                 .sort(([, a], [, b]) => (b as number) - (a as number))
                 .map(([ep]) => parseInt(ep));
               latestEpisode = sortedEpisodes[0] || Math.max(...episodeNumbers);
-              console.log("Detected episode numbers:", episodeNumbers);
-              console.log("Episode counts:", episodeCounts);
-              console.log("Selected latest episode:", latestEpisode);
             }
           }
           // Set the selected episode - prioritize URL parameter, then latest episode
@@ -216,22 +206,22 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
             setSelectedEpisode("all");
             setTorrents(allTorrentsData);
           }
+          setTorrentsLoading(false);
         } catch (torrentError) {
-          console.error("Error fetching all torrents:", torrentError);
           // Default to "all" episodes if torrent fetch fails
           if (!episodeParam) {
             setSelectedEpisode("all");
           }
           await fetchTorrentsForEpisode(episodeParam || "all", searchTerm);
+          setTorrentsLoading(false);
         }
       } catch (error: any) {
-        console.error("Error fetching anime:", error);
         setError(
           error.response?.data?.message ||
             "Failed to fetch anime details. Please try again."
         );
-      } finally {
-        setLoading(false);
+        setAnimeLoading(false);
+        setTorrentsLoading(false);
       }
     };
     fetchAnime();
@@ -607,7 +597,7 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
     );
   };
 
-  if (loading) {
+  if (animeLoading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -853,11 +843,6 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
 
       {/* Torrents Section */}
       {(() => {
-        console.log("Torrents section render:");
-        console.log("- torrents state length:", torrents.length);
-        console.log("- qualityFilter:", qualityFilter);
-        console.log("- selectedEpisode:", selectedEpisode);
-
         return (
           <div className="card p-6 mb-8" data-torrents-section>
             <h3 className="text-xl font-bold text-white mb-4 flex flex-col sm:flex-row sm:items-center">
@@ -867,17 +852,23 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
               </div>
             </h3>
             <div className="flex-1">
-              <TorrentSection
-                torrents={torrents}
-                loading={loading}
-                selectedEpisode={selectedEpisode}
-                qualityFilter={qualityFilter}
-                torrentSort={torrentSort}
-                onEpisodeChange={handleEpisodeChange}
-                onQualityFilterChange={setQualityFilter}
-                onTorrentSortChange={setTorrentSort}
-                episodeOptions={generateEpisodeOptions(anime.episodes || 0)}
-              />
+              {torrentsLoading ? (
+                <div className="flex justify-center items-center h-32">
+                  <span className="loading loading-spinner loading-md" />
+                </div>
+              ) : (
+                <TorrentSection
+                  torrents={torrents}
+                  loading={torrentsLoading}
+                  selectedEpisode={selectedEpisode}
+                  qualityFilter={qualityFilter}
+                  torrentSort={torrentSort}
+                  onEpisodeChange={handleEpisodeChange}
+                  onQualityFilterChange={setQualityFilter}
+                  onTorrentSortChange={setTorrentSort}
+                  episodeOptions={generateEpisodeOptions(anime.episodes || 0)}
+                />
+              )}
             </div>
           </div>
         );

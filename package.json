@@ -17,8 +17,5 @@
     "nyaa"
   ],
   "author": "Your Name",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  }
+  "license": "MIT"
 }

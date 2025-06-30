@@ -112,7 +112,13 @@ const AnimeCard: React.FC<AnimeCardProps> = ({
           title={
             isInCustomList ? "Remove from custom list" : "Add to custom list"
           }
-          style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            width: 36,
+            height: 36,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           {isInCustomList ? (
             <span className="text-lg font-bold">✕</span>
