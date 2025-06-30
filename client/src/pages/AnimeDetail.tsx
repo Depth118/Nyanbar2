@@ -484,15 +484,15 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
     return (
       <div className="space-y-6">
         {/* Episode Selection and Filters */}
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-center">
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
             <label className="text-sm font-medium text-gray-300">
               Episode:
             </label>
             <select
               value={selectedEpisode}
               onChange={(e) => onEpisodeChange(e.target.value)}
-              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto"
             >
               {episodeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -501,15 +501,14 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
               ))}
             </select>
           </div>
-
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
             <label className="text-sm font-medium text-gray-300">
               Quality:
             </label>
             <select
               value={qualityFilter}
               onChange={(e) => onQualityFilterChange(e.target.value)}
-              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto"
             >
               <option value="all">All Qualities</option>
               <option value="4k">4K</option>
@@ -518,15 +517,14 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
               <option value="sd">SD</option>
             </select>
           </div>
-
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
             <label className="text-sm font-medium text-gray-300">
               Sort by:
             </label>
             <select
               value={torrentSort}
               onChange={(e) => onTorrentSortChange(e.target.value)}
-              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="bg-dark-700 border border-gray-600 rounded-md px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto"
             >
               <option value="default">Default</option>
               <option value="seeders">Most Seeders</option>
@@ -535,63 +533,58 @@ const AnimeDetail: React.FC<AnimeDetailProps> = () => {
             </select>
           </div>
         </div>
-
         {/* Torrent List */}
         {sortedTorrents.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-400">No torrents found for this episode.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {sortedTorrents.map((torrent, index) => {
               const quality = getQualityLabel(torrent.title);
               return (
                 <div
                   key={index}
-                  className="bg-dark-700 border border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors"
+                  className="bg-dark-700 border border-gray-600 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 hover:border-gray-500 transition-colors"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${quality.color} ${quality.textColor}`}
-                        >
-                          {quality.label}
-                        </span>
-                        <span className="text-sm text-gray-400">
-                          {torrent.size}
-                        </span>
-                      </div>
-                      <h3 className="text-white font-medium mb-2 line-clamp-2">
-                        {torrent.title}
-                      </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <span>📅 {torrent.date}</span>
-                        <span>🌱 {torrent.seeds}</span>
-                        <span>🔗 {torrent.leeches}</span>
-                      </div>
+                  <div className="flex items-center gap-2 mb-2 sm:mb-0">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${quality.color} ${quality.textColor}`}
+                    >
+                      {quality.label}
+                    </span>
+                    <span className="text-sm text-gray-400">
+                      {torrent.size}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-medium mb-1 line-clamp-2 text-sm sm:text-base">
+                      {torrent.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-2">
+                      <span>📅 {torrent.date}</span>
+                      <span>🌱 {torrent.seeds}</span>
+                      <span>🔗 {torrent.leeches}</span>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      {torrent.magnetUrl && (
-                        <a
-                          href={torrent.magnetUrl}
-                          className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Download size={16} />
-                          <span>Magnet</span>
-                        </a>
-                      )}
+                    <div className="flex gap-2 mt-1">
                       <a
                         href={torrent.downloadUrl}
-                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
+                        className="inline-block px-3 py-1 rounded bg-primary-600 text-white text-xs font-semibold hover:bg-primary-700 transition-colors"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <ExternalLink size={16} />
-                        <span>Download</span>
+                        Direct
                       </a>
+                      {torrent.magnetUrl && (
+                        <a
+                          href={torrent.magnetUrl}
+                          className="inline-block px-3 py-1 rounded bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-colors"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Magnet
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
