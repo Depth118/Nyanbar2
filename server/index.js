@@ -297,6 +297,8 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
       }
     };
 
+    console.log("Torrent search for:", decodedTitle, "episode:", episode);
+
     let allTorrents = [];
 
     if (episode && episode !== "all") {
@@ -394,6 +396,7 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
           } else {
             await new Promise((resolve) => setTimeout(resolve, 500));
           }
+          console.error("Error fetching from nyaa.si:", error.message);
           continue;
         }
       }
@@ -471,6 +474,7 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
           if (error.response && error.response.status === 429) {
             break; // Stop trying more variations if rate limited
           }
+          console.error("Error fetching from nyaa.si:", error.message);
         }
       }
     }
@@ -491,6 +495,7 @@ app.get("/api/torrents/:animeTitle", async (req, res) => {
 
     allTorrents = allTorrents.slice(0, 40);
 
+    console.log("Returning", allTorrents.length, "torrents for", decodedTitle);
     res.json(allTorrents);
   } catch (error) {
     console.error("Error fetching torrents:", error);
